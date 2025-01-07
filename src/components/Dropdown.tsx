@@ -12,9 +12,9 @@ export const Dropdown: React.FC<{
             key={person.slug}
             className="dropdown-item"
             data-cy="suggestion-item"
+            onClick={() => onSelected(person)}
           >
             <p
-              onClick={() => onSelected(person)}
               className={
                 person.fatherName && person.motherName
                   ? 'has-text-link'

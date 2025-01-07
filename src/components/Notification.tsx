@@ -22,18 +22,22 @@ export const Notification: React.FC<Props> = ({
   const [isActive, setIsActive] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
 
-  const handleFocus = () => {
+  const handleFocus = (): void => {
     setIsActive(true);
   };
 
-  const deboncedSetQuery = useMemo(
-    () => debounce((value: string) => setAppliedQuery(value), delay),
+  const debouncedSetQuery = useMemo(
+    () => debounce((value: string) => setAppliedQuery(value.trim()), delay),
     [debounce, delay],
   );
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(event.target.value);
-    deboncedSetQuery(event.target.value);
+  const handleInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ): void => {
+    const value = event.target.value;
+
+    setQuery(value);
+    debouncedSetQuery(value);
     setSelectedPerson(null);
   };
 
@@ -43,8 +47,12 @@ export const Notification: React.FC<Props> = ({
     );
   }, [appliedQuery, peopleFromServer]);
 
-  const handleSelectPerson = (person: Person) => {
+  const handleSelectPerson = (person: Person): void => {
     setSelectedPerson(person);
+    setIsActive(false);
+  };
+
+  const handleBlur = (): void => {
     setIsActive(false);
   };
 
@@ -56,7 +64,10 @@ export const Notification: React.FC<Props> = ({
           : 'No selected person'}
       </h1>
 
-      <div className={classNames('dropdown', { 'is-active': isActive })}>
+      <div
+        className={classNames('dropdown', { 'is-active': isActive })}
+        onBlur={handleBlur}
+      >
         <div className="dropdown-trigger">
           <input
             type="text"
@@ -69,18 +80,17 @@ export const Notification: React.FC<Props> = ({
           />
         </div>
 
-        <Dropdown people={filteredPeople} onSelected={handleSelectPerson} />
+        {isActive && (
+          <Dropdown people={filteredPeople} onSelected={handleSelectPerson} />
+        )}
       </div>
 
-      {filteredPeople.length === 0 && (
+      {isActive && filteredPeople.length === 0 && (
         <div
           className="
-                notification
-                is-danger
-                is-light
-                mt-3
-                is-align-self-flex-start
-              "
+          notification
+          is-danger is-light mt-3 is-align-self-flex-start
+          "
           role="alert"
           data-cy="no-suggestions-message"
         >
